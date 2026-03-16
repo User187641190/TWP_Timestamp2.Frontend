@@ -782,6 +782,8 @@ async function loadCEOCharts() {
 }
 
 async function deleteData(type, id) {
+    const token = localStorage.getItem('token');
+    
     const result = await Swal.fire({
         title: 'คุณแน่ใจหรือไม่?',
         text: "ข้อมูลนี้จะถูกลบอย่างถาวรและกู้คืนไม่ได้!",
@@ -796,6 +798,8 @@ async function deleteData(type, id) {
     if (result.isConfirmed) {
         try {
             // ✅ ใช้ API_URL แทนการระบุ 127.0.0.1 ตรงๆ 
+            
+            
             const response = await fetch(`${API_URL}/${type}/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -876,6 +880,7 @@ async function changeVehicleStatus(vehicleId, newStatus) {
 
 // ฟังก์ชันสำหรับดึงข้อมูล View มาแสดง (สำหรับ CEO เท่านั้น)
 async function fetchAndDisplayView() {
+    const columns = Object.keys(data[0]);
     const viewName = document.getElementById('view-selector').value;
     const token = localStorage.getItem('token');
     
