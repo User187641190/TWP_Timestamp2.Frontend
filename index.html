@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS System - Role Based Access</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
+        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+
+        .active-nav { background-color: #334155; border-left: 4px solid #60a5fa; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="loginSection" class="min-h-screen flex items-center justify-center bg-slate-900">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm transform transition duration-500 hover:scale-105">
+            <div class="text-center mb-6">
+                <i class="fas fa-warehouse text-5xl text-blue-600 mb-2"></i>
+                <h1 class="text-2xl font-bold text-gray-800">WMS Login</h1>
+                <p class="text-sm text-gray-500">Warehouse Management System</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter username" required>
+                </div>
+
+            
+                <div class="relative w-full">
+                        <input type="password" id="password" placeholder="Enter password" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        <button type="button" onclick="toggleLoginPassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-500 focus:outline-none">
+                            <i class="fas fa-eye" id="eye_icon"></i>
+                        </button>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition duration-300 font-semibold shadow-md">
+                    เข้าสู่ระบบ
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboardSection" class="hidden min-h-screen flex flex-row">
+        
+        <aside class="w-64 bg-slate-800 text-white flex flex-col fixed h-full shadow-2xl z-20">
+            <div class="p-6 text-xl font-bold border-b border-slate-700 flex items-center">
+                <i class="fas fa-box-open mr-3 text-blue-400"></i> WMS Pro
+            </div>
+            
+            <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+                
+                <div id="menu-ceo" class="hidden">
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-2">Executive</p>
+                    <button onclick="showPage('ceo-page')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-700 transition flex items-center">
+                        <i class="fas fa-chart-pie w-6"></i> ภาพรวม (Dashboard)
+                    </button>
+                </div>
+
+                <div id="menu-admin" class="hidden">
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-2">Administration</p>
+                    <button onclick="showPage('admin-emp')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-700 transition flex items-center">
+                        <i class="fas fa-users w-6"></i> จัดการพนักงาน
+                    </button>
+                    <button onclick="showPage('admin-vehicle')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-700 transition flex items-center">
+                        <i class="fas fa-truck w-6"></i> จัดการรถขนส่ง
+                    </button>
+                    <button onclick="showPage('admin-user')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-700 transition flex items-center">
+                        <i class="fas fa-user-shield w-6"></i> จัดการ Users
+                    </button>
+                    <button onclick="showPage('admin-product')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-700 transition flex items-center">
+                        <i class="fas fa-solid fa-boxes-stacked w-6"></i> จัดการ สินค้า
+                    </button>
+                </div>
+
+                <div id="menu-employee" class="hidden">
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-2">Operations</p>
+                    <button onclick="showPage('emp-create-bill')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-700 transition flex items-center">
+                        <i class="fas fa-plus-circle w-6"></i> เปิดบิลส่งของ
+                    </button>
+                    <button onclick="showPage('emp-list-bill')" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-700 transition flex items-center">
+                        <i class="fas fa-list-alt w-6"></i> รายการงานส่ง
+                    </button>
+                </div>
+            </nav>
+
+            <div class="p-4 bg-slate-900 border-t border-slate-700">
+                <div class="flex items-center mb-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-bold mr-3">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <p id="user-display-name" class="text-sm font-semibold">User</p>
+                        <p id="user-display-role" class="text-xs text-gray-400">Role</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white text-sm py-2 rounded transition">
+                    ออกจากระบบ
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 ml-64 p-8 bg-gray-50 min-h-screen">
+            
+            <div id="ceo-page" class="page-content hidden">
+                            <h2 class="text-xl font-bold mb-4 text-gray-800">
+                    <i class="fas fa-chart-line text-blue-600"></i> รายงานสรุปสำหรับผู้บริหาร (CEO Dashboard)
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white p-5 rounded-lg shadow-md border border-gray-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">
+                            <i class="fas fa-boxes text-blue-500"></i> มูลค่าสินค้าคงคลัง (แยกตามโกดัง)
+                        </h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="inventoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg shadow-md border border-gray-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">
+                            <i class="fas fa-crown text-yellow-500"></i> Top ลูกค้ายอดสั่งซื้อสูงสุด
+                        </h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="customerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="view-selector" class="block text-sm font-medium text-gray-700 mb-1">เลือกรายงานที่ต้องการดู:</label>
+                    <select id="view-selector" onchange="fetchAndDisplayView()" class="w-full md:w-1/2 p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                        <option value="vw_master_delivery_dashboard">1. ภาพรวมการจัดส่ง (Master Dashboard)</option>
+                        <option value="vw_warehouse_inventory_value">2. มูลค่าสินค้าคงคลังแยกตามโกดัง (vw_warehouse_inventory_value)</option>
+                        <option value="vw_customer_order_summary">3. ยอดใช้จ่ายรวมของลูกค้า (vw_customer_order_summary)</option>
+                        <option value="vw_employee_delivery_stats">4. สถิติการวิ่งงานของพนักงาน (vw_employee_delivery_stats)</option>
+                        <option value="vw_vehicle_usage_summary">5. สรุปยอดการใช้งานรถ (vw_vehicle_usage_summary)</option>
+                        <option value="vw_low_stock_products">6. สินค้าที่ควรเติมสต็อกด่วน (vw_low_stock_products)</option>
+                        <option value="vw_user_roles_details">7. ข้อมูลผู้ใช้งานระบบ (vw_user_roles_details)</option>
+                        <option value="vw_delivery_bill_info">8. รายละเอียดบิลจัดส่ง (vw_delivery_bill_info)</option>
+                        <option value="vw_bill_total_value">9. สรุปยอดเงินแต่ละบิล (vw_bill_total_value)</option>
+                        <option value="vw_latest_delivery_status">10. สถานะล่าสุดของบิล (vw_latest_delivery_status)</option>
+                    </select>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead id="view-table-head" class="bg-gray-800 text-white text-sm">
+                            </thead>
+                        <tbody id="view-table-body" class="text-sm text-gray-700">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="admin-emp" class="page-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800"><i class="fas fa-users mr-2"></i>จัดการพนักงาน</h2>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-blue-600 border-b pb-2">ลงทะเบียนพนักงานใหม่</h3>
+                    <form onsubmit="adminCreateEmp(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">ชื่อ-นามสกุล</label>
+                            <input type="text" id="emp_name" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none" placeholder="เช่น สมชาย ใจดี" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">เบอร์โทรศัพท์</label>
+                            <input type="text" id="emp_phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none" placeholder="08xxxxxxxx (ตัวเลขเท่านั้น)" required>
+                        </div>
+                        <div class="flex items-end">
+                            <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+                                <i class="fas fa-save mr-1"></i> บันทึกข้อมูล
+                            </button>
+                        </div>
+                    </form>
+                    <p class="text-xs text-gray-400 mt-2">*รหัสพนักงานจะรันอัตโนมัติ | สถานะเริ่มต้น: Active</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-gray-100 px-6 py-3 border-b flex justify-between items-center">
+                        <h3 class="font-semibold text-gray-700">รายชื่อพนักงานทั้งหมด</h3>
+                        <button onclick="loadAdminData('employees')" class="text-blue-600 text-sm hover:underline"><i class="fas fa-sync"></i> รีเฟรช</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
+                                    <th class="p-4 border-b">ID</th>
+                                    <th class="p-4 border-b">ชื่อ-นามสกุล</th>
+                                    <th class="p-4 border-b">เบอร์โทร</th>
+                                    <th class="p-4 border-b">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-emps" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-vehicle" class="page-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800"><i class="fas fa-truck mr-2"></i>จัดการรถขนส่ง</h2>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-orange-600 border-b pb-2">ลงทะเบียนรถใหม่</h3>
+                    <form onsubmit="adminCreateVehicle(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">ทะเบียนรถ</label>
+                            <input type="text" id="veh_plate" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-200 outline-none" placeholder="เช่น 1กข-9999" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">รายละเอียดรถ</label>
+                            <input type="text" id="veh_desc" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none" placeholder="เช่น รถดั้มฟ้า , รถมิตซู , รถ4ประตู   ฯลฯ">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">สถานะเริ่มต้น</label>
+                            <select id="veh_status" class="w-full border p-2 rounded bg-white">
+                                <option value="Available">Available (พร้อมใช้)</option>
+                                <option value="Maintenance">Maintenance (ซ่อมบำรุง)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button class="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 transition">
+                                <i class="fas fa-save mr-1"></i> บันทึกรถ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-gray-100 px-6 py-3 border-b flex justify-between items-center">
+                        <h3 class="font-semibold text-gray-700">รายการรถทั้งหมด</h3>
+                        <button onclick="loadAdminData('vehicles')" class="text-blue-600 text-sm hover:underline"><i class="fas fa-sync"></i> รีเฟรช</button>
+                    </div>
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
+                                <th class="p-4 border-b">ID</th>
+                                <th class="p-4 border-b">ทะเบียน</th>
+                                <th class="p-4 border-b">สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-vehs" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="admin-user" class="page-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800"><i class="fas fa-user-shield mr-2"></i>จัดการผู้ใช้งาน (Users)</h2>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-green-600 border-b pb-2">สร้าง User ใหม่</h3>
+                    <form onsubmit="adminCreateUser(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="new_u_name" placeholder="Username" class="border p-2 rounded" required>
+                        <div class="relative w-full">
+                            <input type="password" id="new_u_pass" placeholder="Password" class="border p-2 rounded w-full pr-10" required>
+                            
+                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-500 focus:outline-none">
+                                <i class="fas fa-eye" id="eye_icon"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">บทบาท (Role)</label>
+                            <select id="new_u_role" class="w-full border p-2 rounded bg-white mt-1">
+                                <option value=2>Employee (พนักงานทั่วไป)</option>
+                                <option value=1>Admin (ผู้ดูแลระบบ)</option>
+                                <option value=3>CEO (ผู้บริหาร)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">เชื่อมโยงพนักงาน (ใส่ Employee ID)</label>
+                            <input type="number" id="new_u_empid" placeholder="ระบุ ID พนักงาน (เช่น 1)" class="w-full border p-2 rounded mt-1" required>
+                            <p class="text-[10px] text-red-500">*ต้องสร้างพนักงานก่อน แล้วนำ ID มาใส่ที่นี่</p>
+                        </div>
+
+                        <div class="md:col-span-2 mt-2">
+                            <button class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
+                                <i class="fas fa-user-plus mr-1"></i> สร้าง User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-gray-100 px-6 py-3 border-b flex justify-between items-center">
+                        <h3 class="font-semibold text-gray-700">User ทั้งหมด</h3>
+                        <button onclick="loadAdminData('users')" class="text-blue-600 text-sm hover:underline"><i class="fas fa-sync"></i> รีเฟรช</button>
+                    </div>
+                    <table class="w-full text-left">
+                        <thead><tr class="bg-gray-50 text-gray-600 text-sm uppercase"><th class="p-4 border-b">ID</th><th class="p-4 border-b">Username</th><th class="p-4 border-b">Role</th><th class="p-4 border-b">Status</th></tr></thead>
+                        <tbody id="table-users" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="admin-product" class="page-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-boxes text-blue-500 mr-2"></i> จัดการสินค้า</h2>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2"><i class="fas fa-plus-circle text-green-500 mr-1"></i> เพิ่มสินค้าใหม่</h3>
+                    
+                    <form id="addProductForm" onsubmit="adminCreateProduct(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อสินค้า <span class="text-red-500">*</span></label>
+                            <input type="text" id="product_name" required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="เช่น ปูนซีเมนต์...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ราคา/หน่วย (บาท) <span class="text-red-500">*</span></label>
+                            <input type="number" id="product_price" required min="0" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนเริ่มต้น <span class="text-red-500">*</span></label>
+                            <input type="number" id="quantity" required min="0" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="0">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center">
+                                <i class="fas fa-save mr-2"></i> บันทึกข้อมูล
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-gray-100 px-6 py-3 border-b flex justify-between items-center">
+                        <h3 class="font-semibold text-gray-700">สินค้าทั้งหมด</h3>
+                        <button onclick="loadAdminData('products')" class="text-blue-600 text-sm hover:underline"><i class="fas fa-sync"></i> รีเฟรช</button>
+                    </div>
+                    <table class="w-full text-left border-collapse">
+                       <thead><tr class="bg-gray-50 text-gray-600 text-sm uppercase"><th class="p-4 border-b">ID</th><th class="p-4 border-b">ชื่อสินค้า</th><th class="p-4 border-b">ราคา/หน่วย</th><th class="p-4 border-b">จำนวนที่เหลือ</th></tr></thead>
+                        <tbody id="table-products">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="emp-create-bill" class="page-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800"><i class="fas fa-file-invoice mr-2"></i>เปิดบิลส่งของ</h2>
+                
+                <div class="max-w-3xl bg-white p-8 rounded-lg shadow-lg">
+                    <form onsubmit="createBill(event)">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4 border-l-4 border-blue-500 pl-3">ข้อมูลลูกค้า</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้รับสินค้า</label>
+                                <input type="text" id="bill_receiver" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ชื่อ-นามสกุล" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์ติดต่อ</label>
+                                <input type="text" id="bill_phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="เบอร์โทรศัพท์" required>
+                            </div>
+                        </div>
+
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4 border-l-4 border-orange-500 pl-3">ข้อมูลการขนส่ง</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">เลขที่บิล (Bill ID)</label>
+                            <input type="text" id="bill_id" maxlength=5 oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ระบุเลขที่บิล" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">เลือกรถขนส่ง</label>
+                                <select id="bill_vehicle" class="w-full border border-gray-300 p-2.5 rounded-lg bg-white">
+                                    <option>กำลังโหลดข้อมูล...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">เลือกคนขับรถ</label>
+                                <select id="bill_employee" class="w-full border border-gray-300 p-2.5 rounded-lg bg-white">
+                                    <option>กำลังโหลดข้อมูล...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-slate-800 text-white text-lg py-3 rounded-lg hover:bg-slate-900 transition shadow-lg">
+                            ยืนยันการเปิดบิล
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="emp-list-bill" class="page-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-clipboard-list text-blue-500 mr-2"></i> รายการงานส่งของ</h2>
+                    <button onclick="showPage('emp-create-bill')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition">
+                        <i class="fas fa-plus mr-1"></i> สร้างบิลใหม่
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white">
+                                <th class="p-4 font-medium">รหัสบิล</th>
+                                <th class="p-4 font-medium">ชื่อผู้รับ</th>
+                                <th class="p-4 font-medium">เบอร์โทร</th>
+                                <th class="p-4 font-medium">สถานะ</th>
+                                <th class="p-4 font-medium text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="statusModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-96 p-6">
+            <h3 class="text-xl font-bold mb-4">อัปเดตสถานะ</h3>
+            <p class="mb-4 text-gray-600">Bill ID: <span id="modal_bill_display" class="font-mono font-bold"></span></p>
+            
+            <input type="hidden" id="modal_bill_id">
+            <label class="block text-sm font-medium mb-1">สถานะใหม่:</label>
+            <select id="modal_new_status" class="w-full border p-2 rounded mb-6">
+                <option value="Await">Await (รอส่ง)</option>
+                <option value="Pending">Pending (กำลังส่ง)</option>
+                <option value="Delivered">Delivered (ส่งสำเร็จ)</option>
+                <option value="Cancel">Cancel (ยกเลิก)</option>
+            </select>
+            
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ยกเลิก</button>
+                <button onclick="saveStatus()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
