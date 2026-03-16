@@ -798,7 +798,9 @@ async function deleteData(type, id) {
             // ✅ ใช้ API_URL แทนการระบุ 127.0.0.1 ตรงๆ 
             const response = await fetch(`${API_URL}/${type}/${id}`, {
                 method: 'DELETE',
-                headers: {'Authorization': `Bearer ${token}`
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                    }
             });
 
             if (response.ok) {
