@@ -1,4 +1,4 @@
-const API_URL = "twptimestamp2-production.up.railway.app"; 
+const API_URL = "https://twptimestamp2-production.up.railway.app"; 
 
 // ---- 1. AUTHENTICATION ----
 async function handleLogin(e) {
