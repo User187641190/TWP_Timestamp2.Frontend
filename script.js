@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.0.102:8000"; 
+const API_URL = "twptimestamp2-production.up.railway.app"; 
 
 // ---- 1. AUTHENTICATION ----
 async function handleLogin(e) {
